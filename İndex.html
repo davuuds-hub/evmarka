@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="az" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvMarka — Müasir Əmlak və Daşınmaz Əmlak Platforması</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                        },
+                        gold: {
+                            500: '#D97706',
+                            600: '#B45309',
+                            100: '#FEF3C7',
+                            50: '#FFFBEB',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Xüsusi sürüşdürmə çubuğu və incə animasiyalar */
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #0F172A;
+            background-color: #FFFFFF;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Range input (İpoteka kalkulyatoru) dizaynı */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #D97706;
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+            cursor: pointer;
+            margin-top: -7px;
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #E2E8F0;
+            border-radius: 999px;
+        }
+        .modal-backdrop {
+            background-color: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-amber-100 selection:text-amber-900">
+
+    <!-- Bildiriş Qutusu (Toast Notification) -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-navy-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p id="toast-title" class="text-sm font-semibold">Uğurlu əməliyyat</p>
+                <p id="toast-message" class="text-xs text-slate-300">Məlumat qeydə alındı.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Naviqasiya Paneli -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Brend Loqosu -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center text-white shadow-sm group-hover:bg-amber-600 transition-colors">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01M9 13h.01M15 13h.01" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-display font-extrabold text-xl tracking-tight text-navy-900">Ev<span class="text-amber-600">Marka</span></span>
+                        <span class="block text-[10px] uppercase tracking-widest text-slate-400 font-semibold -mt-1">Əmlak Platforması</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Menyu -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#elanlar" onclick="quickFilterDeal('Alqı-satqı')" class="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors">Alqı-satqı</a>
+                    <a href="#elanlar" onclick="quickFilterDeal('Kirayə')" class="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors">Kirayə</a>
+                    <a href="#elanlar" onclick="quickFilterType('Yeni tikili')" class="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors">Yeni tikililər</a>
+                    <a href="#ipoteka" class="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors">İpoteka kalkulyatoru</a>
+                    <a href="#elaqe" class="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors">Əlaqə</a>
+                </nav>
+
+                <!-- Sağ Əməliyyat Düymələri -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleFavoritesFilter()" id="fav-header-btn" class="relative p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/50 transition-all" title="Seçilmiş elanlar">
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                        <span id="fav-count-badge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white text-[11px] font-bold flex items-center justify-center">0</span>
+                    </button>
+
+                    <button onclick="openAddListingModal()" class="inline-flex items-center gap-2 bg-navy-900 hover:bg-amber-600 text-white text-sm font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-sm transition-all duration-200">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Elan yerləşdir</span>
+                    </button>
+
+                    <!-- Mobil Menyu Düyməsi -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-xl border border-slate-200 text-slate-700">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobil Menyu Açılan Hissə -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-4 pt-3 pb-5 space-y-2 shadow-lg">
+            <a href="#elanlar" onclick="quickFilterDeal('Alqı-satqı'); toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Alqı-satqı</a>
+            <a href="#elanlar" onclick="quickFilterDeal('Kirayə'); toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Kirayə</a>
+            <a href="#elanlar" onclick="quickFilterType('Yeni tikili'); toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Yeni tikililər</a>
+            <a href="#ipoteka" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">İpoteka kalkulyatoru</a>
+            <a href="#elaqe" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Əlaqə</a>
+        </div>
+    </header>
+
+    <!-- Hero Bölməsi və Çoxfunksiyalı Axtarış -->
+    <section class="relative bg-navy-900 overflow-hidden">
+        <!-- Arxa plan memarlıq şəkli -->
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2000&q=80" 
+                 onerror="this.src='https://placehold.co/1920x900/0F172A/FFFFFF?text=EvMarka+Baku+Architecture'"
+                 alt="Müasir yaşayış kompleksi" 
+                 class="w-full h-full object-cover opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/65 to-navy-900/95"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-amber-300 text-xs font-semibold tracking-wide mb-6">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    BAKI VƏ XIRDALAN ÜZRƏ SEÇİLMİŞ ƏMLAK BAZASI
+                </div>
+                <h1 class="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12] mb-5">
+                    Arzuladığınız evi <span class="text-amber-400">rahatlıqla</span> tapın
+                </h1>
+                <p class="text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed mb-10">
+                    Çıxarışlı yeni tikililər, prestijli yaşayış kompleksləri və ipotekaya yararlı mənzillər — hamısı şəffaf qiymətlərlə bir platformada.
+                </p>
+            </div>
+
+            <!-- İnteraktiv Axtarış Paneli -->
+            <div class="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 border border-slate-200/80">
+                <!-- Əməliyyat Növü Tabları -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-5 border-b border-slate-100">
+                    <div class="inline-flex p-1 bg-slate-100 rounded-xl">
+                        <button type="button" onclick="setDealTab('Hamısı')" id="tab-all" class="deal-tab px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white text-navy-900 shadow-sm transition-all">Hamısı</button>
+                        <button type="button" onclick="setDealTab('Alqı-satqı')" id="tab-sale" class="deal-tab px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-navy-900 transition-all">Alqı-satqı</button>
+                        <button type="button" onclick="setDealTab('Kirayə')" id="tab-rent" class="deal-tab px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-navy-900 transition-all">Kirayə</button>
+                    </div>
+                    <button type="button" onclick="resetFilters()" class="text-xs font-medium text-slate-500 hover:text-amber-600 inline-flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        Filtrləri sıfırla
+                    </button>
+                </div>
+
+                <!-- Filtr Seçimləri Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                    <!-- Əmlak növü -->
+                    <div class="lg:col-span-3">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Əmlak növü</label>
+                        <div class="relative">
+                            <select id="filter-type" onchange="applyFilters()" class="w-full appearance-none bg-slate-50 border border-slate-200 text-navy-900 text-sm font-medium rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                                <option value="Hamısı">Bütün əmlak növləri</option>
+                                <option value="Yeni tikili">Yeni tikili</option>
+                                <option value="Köhnə tikili">Köhnə tikili</option>
+                                <option value="Həyət evi / Villa">Həyət evi / Villa</option>
+                                <option value="Torpaq">Torpaq</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Rayon / Metro -->
+                    <div class="lg:col-span-3">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Rayon / Metro</label>
+                        <div class="relative">
+                            <select id="filter-location" onchange="applyFilters()" class="w-full appearance-none bg-slate-50 border border-slate-200 text-navy-900 text-sm font-medium rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                                <option value="Hamısı">Bütün ərazilər</option>
+                                <option value="Yasamal">Yasamal r.</option>
+                                <option value="Nəsimi">Nəsimi r.</option>
+                                <option value="Nərimanov">Nərimanov r.</option>
+                                <option value="Xətai / Həzi Aslanov">Xətai / Həzi Aslanov m.</option>
+                                <option value="Səbail">Səbail r.</option>
+                                <option value="Xırdalan">Xırdalan ş.</option>
+                            </select>
+                            <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Otaq sayı -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Otaq sayı</label>
+                        <div class="relative">
+                            <select id="filter-rooms" onchange="applyFilters()" class="w-full appearance-none bg-slate-50 border border-slate-200 text-navy-900 text-sm font-medium rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                                <option value="Hamısı">Hamısı</option>
+                                <option value="1">1 otaqlı</option>
+                                <option value="2">2 otaqlı</option>
+                                <option value="3">3 otaqlı</option>
+                                <option value="4+">4+ otaqlı</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Qiymət aralığı -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Maks. qiymət (AZN)</label>
+                        <input type="number" id="filter-max-price" oninput="applyFilters()" placeholder="Məs: 250000" class="w-full bg-slate-50 border border-slate-200 text-navy-900 text-sm font-medium rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                    </div>
+
+                    <!-- Axtar düyməsi -->
+                    <div class="lg:col-span-2">
+                        <a href="#elanlar" onclick="applyFilters()" class="w-full inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm px-5 py-3 rounded-xl shadow-md shadow-amber-600/20 transition-all">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            <span>Axtar</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qısa Statistika -->
+            <div class="grid grid-cols-3 gap-6 max-w-xl mt-10 pt-8 border-t border-white/10">
+                <div>
+                    <p class="font-display text-2xl sm:text-3xl font-bold text-white">1,450+</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Aktiv elan</p>
+                </div>
+                <div>
+                    <p class="font-display text-2xl sm:text-3xl font-bold text-white">98%</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Çıxarışlı mənzillər</p>
+                </div>
+                <div>
+                    <p class="font-display text-2xl sm:text-3xl font-bold text-white">24/7</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Ekspert dəstəyi</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Əmlak Elanları Kataloqu -->
+    <section id="elanlar" class="py-16 sm:py-24 bg-slate-50/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Başlıq və Sürətli Kateqoriya Tabları -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-amber-600">Seçilmiş Təkliflər</span>
+                    <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-navy-900 mt-1">Aktual Əmlak Elanları</h2>
+                    <p id="results-counter" class="text-sm text-slate-500 mt-2">Cəmi 8 elan göstərilir</p>
+                </div>
+
+                <!-- Sürətli Kateqoriya Düymələri -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="quickCategory('Hamısı')" class="cat-pill active px-4 py-2 rounded-xl text-xs font-semibold bg-navy-900 text-white transition-all">Hamısı</button>
+                    <button onclick="quickCategory('Yeni tikili')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-navy-900 transition-all">Yeni tikili</button>
+                    <button onclick="quickCategory('Köhnə tikili')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-navy-900 transition-all">Köhnə tikili</button>
+                    <button onclick="quickCategory('Həyət evi / Villa')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-navy-900 transition-all">Həyət evi / Villa</button>
+                    <button onclick="quickCategory('İpoteka')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:border-navy-900 transition-all">İpotekaya yararlı</button>
+                </div>
+            </div>
+
+            <!-- Elan Kartları Şəbəkəsi (Grid) -->
+            <div id="properties-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                <!-- JavaScript vasitəsilə dinamik doldurulur -->
+            </div>
+
+            <!-- Nəticə Tapılmadıqda -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200/80">
+                <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="search-x" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-display text-lg font-bold text-navy-900">Axtarışınıza uyğun elan tapılmadı</h3>
+                <p class="text-sm text-slate-500 max-w-md mx-auto mt-1 mb-6">Seçilmiş filtr parametrlərini dəyişdirərək və ya sıfırlayaraq digər aktual elanlara baxa bilərsiniz.</p>
+                <button onclick="resetFilters()" class="inline-flex items-center gap-2 bg-navy-900 hover:bg-amber-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+                    Bütün elanları göstər
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- İnteraktiv İpoteka Kalkulyatoru Bölməsi -->
+    <section id="ipoteka" class="py-16 sm:py-24 bg-white border-t border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-2xl mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-600">Maliyyə Planlaması</span>
+                <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-navy-900 mt-1">İpoteka Kalkulyatoru</h2>
+                <p class="text-slate-500 text-sm sm:text-base mt-2">
+                    Almaq istədiyiniz mənzilin dəyərinə və ilkin ödəniş məbləğinə uyğun aylıq ipoteka ödənişinizi dərhal hesablayın.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                <!-- Sol Tərəf: Sürüşdürücülər (Inputs) -->
+                <div class="lg:col-span-7 bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200/80 space-y-7">
+                    <!-- Əmlakın dəyəri -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-navy-900">Əmlakın dəyəri</label>
+                            <div class="flex items-center bg-white border border-slate-200 rounded-xl px-3 py-1.5">
+                                <input type="number" id="calc-price-input" value="180000" min="30000" max="1500000" step="1000" oninput="syncMortgageFromInput()" class="w-24 text-right font-display font-bold text-navy-900 text-sm focus:outline-none">
+                                <span class="text-xs font-semibold text-slate-400 ml-1.5">AZN</span>
+                            </div>
+                        </div>
+                        <input type="range" id="calc-price-range" min="30000" max="1000000" step="5000" value="180000" oninput="syncMortgageFromRange()">
+                        <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                            <span>30,000 ₼</span>
+                            <span>500,000 ₼</span>
+                            <span>1,000,000 ₼</span>
+                        </div>
+                    </div>
+
+                    <!-- İlkin ödəniş % -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-semibold text-navy-900">İlkin ödəniş (<span id="calc-down-percent-label" class="text-amber-600">20%</span>)</label>
+                            <span id="calc-down-amount-label" class="font-display font-bold text-sm text-navy-900 bg-white border border-slate-200 rounded-xl px-3.5 py-1.5">36,000 AZN</span>
+                        </div>
+                        <input type="range" id="calc-down-range" min="15" max="80" step="5" value="20" oninput="calculateMortgage()">
+                        <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                            <span>15% (Minimum)</span>
+                            <span>50%</span>
+                            <span>80%</span>
+                        </div>
+                    </div>
+
+                    <!-- Kredit müddəti və İllik faiz dərəcəsi -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-semibold text-navy-900">Kredit müddəti</label>
+                                <span id="calc-years-label" class="font-display font-bold text-sm text-amber-600">20 il</span>
+                            </div>
+                            <input type="range" id="calc-years-range" min="3" max="25" step="1" value="20" oninput="calculateMortgage()">
+                            <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                                <span>3 il</span>
+                                <span>15 il</span>
+                                <span>25 il</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-900 mb-2">İpoteka növü / İllik faiz</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" onclick="setInterestRate(4, this)" class="rate-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-700 hover:border-amber-500 transition-all">4%<span class="block text-[10px] font-normal text-slate-400">Güzəştli</span></button>
+                                <button type="button" onclick="setInterestRate(7, this)" class="rate-btn py-2 px-2 rounded-xl text-xs font-bold border-2 border-amber-500 bg-amber-50 text-amber-900 transition-all">7%<span class="block text-[10px] font-normal text-amber-700">Dövlət</span></button>
+                                <button type="button" onclick="setInterestRate(8, this)" class="rate-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-700 hover:border-amber-500 transition-all">8%<span class="block text-[10px] font-normal text-slate-400">Adi</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ Tərəf: Nəticə Kartı -->
+                <div class="lg:col-span-5 bg-navy-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>
+                    
+                    <div>
+                        <span class="inline-block text-xs font-semibold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-3 py-1 rounded-lg mb-4">Təxmini Hesablama</span>
+                        <p class="text-slate-400 text-sm">Aylıq ödəniş məbləği</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span id="calc-monthly-payment" class="font-display text-4xl sm:text-5xl font-extrabold text-white">1,116</span>
+                            <span class="text-lg font-semibold text-amber-400">AZN / ay</span>
+                        </div>
+
+                        <!-- Vizual Bölgü Çubuğu -->
+                        <div class="mt-7">
+                            <div class="flex justify-between text-xs text-slate-300 mb-2">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Əsas borc</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> Faiz ödənişi</span>
+                            </div>
+                            <div class="w-full h-3 bg-slate-700 rounded-full overflow-hidden flex">
+                                <div id="bar-principal" class="bg-amber-500 h-full transition-all duration-300" style="width: 54%"></div>
+                                <div id="bar-interest" class="bg-slate-500 h-full transition-all duration-300" style="width: 46%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Detallı Göstəricilər -->
+                        <div class="grid grid-cols-2 gap-4 mt-7 pt-6 border-t border-slate-800">
+                            <div>
+                                <p class="text-xs text-slate-400">Kredit məbləği</p>
+                                <p id="calc-loan-amount" class="font-display font-bold text-lg text-white mt-0.5">144,000 ₼</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400">İllik faiz dərəcəsi</p>
+                                <p id="calc-rate-display" class="font-display font-bold text-lg text-amber-400 mt-0.5">7%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <a href="#elanlar" onclick="quickCategory('İpoteka')" class="w-full inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm py-3.5 px-5 rounded-xl transition-colors">
+                            <span>İpotekaya yararlı mənzillərə bax</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="elaqe" class="bg-navy-900 text-slate-300 pt-16 pb-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800">
+                <!-- Brend Məlumatı -->
+                <div class="lg:col-span-1">
+                    <a href="#" class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-amber-600 flex items-center justify-center text-white">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="font-display font-extrabold text-xl text-white">Ev<span class="text-amber-500">Marka</span></span>
+                    </a>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Azərbaycanın müasir daşınmaz əmlak platforması. Bakı və Abşeron yarımadasında ən etibarlı yaşayış və kommersiya əmlakları.
+                    </p>
+                </div>
+
+                <!-- Sürətli Keçidlər -->
+                <div>
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4">Bölmələr</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="#elanlar" onclick="quickFilterDeal('Alqı-satqı')" class="text-slate-400 hover:text-amber-400 transition-colors">Mənzillərin alqı-satqısı</a></li>
+                        <li><a href="#elanlar" onclick="quickFilterDeal('Kirayə')" class="text-slate-400 hover:text-amber-400 transition-colors">Kirayə mənzillər</a></li>
+                        <li><a href="#elanlar" onclick="quickFilterType('Yeni tikili')" class="text-slate-400 hover:text-amber-400 transition-colors">Yeni tikili komplekslər</a></li>
+                        <li><a href="#elanlar" onclick="quickFilterType('Həyət evi / Villa')" class="text-slate-400 hover:text-amber-400 transition-colors">Villalar və bağ evləri</a></li>
+                        <li><a href="#ipoteka" class="text-slate-400 hover:text-amber-400 transition-colors">İpoteka kalkulyatoru</a></li>
+                    </ul>
+                </div>
+
+                <!-- Populyar Ərazilər -->
+                <div>
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4">Populyar Ərazilər</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="#elanlar" onclick="quickLocation('Yasamal')" class="text-slate-400 hover:text-amber-400 transition-colors">Yasamal rayonu</a></li>
+                        <li><a href="#elanlar" onclick="quickLocation('Nərimanov')" class="text-slate-400 hover:text-amber-400 transition-colors">Nərimanov rayonu</a></li>
+                        <li><a href="#elanlar" onclick="quickLocation('Nəsimi')" class="text-slate-400 hover:text-amber-400 transition-colors">Nəsimi rayonu</a></li>
+                        <li><a href="#elanlar" onclick="quickLocation('Xətai / Həzi Aslanov')" class="text-slate-400 hover:text-amber-400 transition-colors">Xətai / Həzi Aslanov</a></li>
+                        <li><a href="#elanlar" onclick="quickLocation('Xırdalan')" class="text-slate-400 hover:text-amber-400 transition-colors">Xırdalan şəhəri</a></li>
+                    </ul>
+                </div>
+
+                <!-- Əlaqə Məlumatları -->
+                <div>
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4">Bizimlə Əlaqə</h4>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-amber-500 shrink-0 mt-1"></i>
+                            <span>Bakı ş., Nəsimi r., Nizami küç. 203B (AF Business House)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="phone" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                            <span>+994 (12) 555-01-99 / *0199</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="mail" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                            <span>info@evmarka.az</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <p>&copy; 2026 EvMarka Əmlak Platforması. Bütün hüquqlar qorunur.</p>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="hover:text-slate-300 transition-colors">İstifadə qaydaları</a>
+                    <a href="#" class="hover:text-slate-300 transition-colors">Məxfilik siyasəti</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 1: Əmlak Haqqında Ətraflı Məlumat Modalı -->
+    <!-- ===================================================================== -->
+    <div id="property-modal" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop p-4 sm:p-6">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden border border-slate-200 animate-[fadeIn_0.2s_ease-out]">
+                <!-- Modal Şəkil Başlığı -->
+                <div class="relative h-64 sm:h-80 bg-slate-200">
+                    <img id="modal-img" src="" alt="Əmlak şəkli" class="w-full h-full object-cover">
+                    <button onclick="closePropertyModal()" class="absolute top-4 right-4 w-10 h-10 rounded-xl bg-white/90 hover:bg-white text-navy-900 flex items-center justify-center shadow-lg transition-all">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <div id="modal-badges" class="absolute bottom-4 left-4 flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Modal Məzmun -->
+                <div class="p-6 sm:p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <span id="modal-deal-type" class="text-xs font-bold uppercase tracking-wider text-amber-600">Alqı-satqı</span>
+                            <h3 id="modal-title" class="font-display text-2xl font-extrabold text-navy-900 mt-1">Elan başlığı</h3>
+                            <p id="modal-location" class="text-sm text-slate-500 flex items-center gap-1.5 mt-1.5">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-amber-600"></i>
+                                <span>Ünvan</span>
+                            </p>
+                        </div>
+                        <div class="sm:text-right">
+                            <p id="modal-price" class="font-display text-2xl sm:text-3xl font-extrabold text-navy-900">0 AZN</p>
+                            <p id="modal-price-sqm" class="text-xs font-medium text-slate-500 mt-1">0 AZN / m²</p>
+                        </div>
+                    </div>
+
+                    <!-- Əsas Texniki Göstəricilər -->
+                    <div class="grid grid-cols-3 gap-4 py-5 border-b border-slate-100">
+                        <div class="bg-slate-50 p-3.5 rounded-xl">
+                            <span class="text-xs text-slate-400 block">Otaq sayı</span>
+                            <span id="modal-rooms" class="font-display font-bold text-navy-900 text-base mt-0.5 block">3 otaq</span>
+                        </div>
+                        <div class="bg-slate-50 p-3.5 rounded-xl">
+                            <span class="text-xs text-slate-400 block">Ümumi sahə</span>
+                            <span id="modal-area" class="font-display font-bold text-navy-900 text-base mt-0.5 block">115 m²</span>
+                        </div>
+                        <div class="bg-slate-50 p-3.5 rounded-xl">
+                            <span class="text-xs text-slate-400 block">Mərtəbə</span>
+                            <span id="modal-floor" class="font-display font-bold text-navy-900 text-base mt-0.5 block">12 / 16</span>
+                        </div>
+                    </div>
+
+                    <!-- Təsvir və Üstünlüklər -->
+                    <div class="py-5 space-y-4">
+                        <div>
+                            <h4 class="font-display font-bold text-sm text-navy-900 uppercase tracking-wider mb-2">Ətraflı məlumat</h4>
+                            <p id="modal-desc" class="text-sm text-slate-600 leading-relaxed"></p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-display font-bold text-sm text-navy-900 uppercase tracking-wider mb-2.5">Planlama və Özəlliklər</h4>
+                            <div id="modal-features" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Agentlə Əlaqə / Baxış Sorğusu Forması -->
+                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 mt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-full bg-navy-900 text-white font-display font-bold flex items-center justify-center text-sm">
+                                    EM
+                                </div>
+                                <div>
+                                    <p id="modal-agent-name" class="font-display font-bold text-sm text-navy-900">Rəşad Əliyev</p>
+                                    <p class="text-xs text-slate-500">Sertifikatlı Əmlak Eksperti</p>
+                                </div>
+                            </div>
+                            <a href="tel:+994505550199" class="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-navy-900 text-navy-900 font-semibold text-xs px-4 py-2.5 rounded-xl transition-colors">
+                                <i data-lucide="phone" class="w-3.5 h-3.5 text-amber-600"></i>
+                                <span>+994 (50) 555-01-99</span>
+                            </a>
+                        </div>
+
+                        <form onsubmit="submitViewingRequest(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <input type="text" required placeholder="Adınız və Soyadınız" class="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                            <input type="tel" required placeholder="Telefon (+994 50 ...)" class="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm py-2.5 px-4 rounded-xl transition-colors">
+                                Baxış təyin et
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 2: Yeni Elan Yerləşdir Modalı -->
+    <!-- ===================================================================== -->
+    <div id="add-listing-modal" class="fixed inset-0 z-50 hidden overflow-y-auto modal-backdrop p-4 sm:p-6">
+        <div class="min-h-full flex items-center justify-center">
+            <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 p-6 sm:p-8">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-display text-xl font-extrabold text-navy-900">Yeni Elan Yerləşdir</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Məlumatları daxil edin, elanınız dərhal kataloqda görünəcək.</p>
+                    </div>
+                    <button onclick="closeAddListingModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="handleAddNewListing(event)" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Əməliyyat növü</label>
+                            <select id="new-deal" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                                <option value="Alqı-satqı">Alqı-satqı</option>
+                                <option value="Kirayə">Kirayə</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Əmlak növü</label>
+                            <select id="new-type" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                                <option value="Yeni tikili">Yeni tikili</option>
+                                <option value="Köhnə tikili">Köhnə tikili</option>
+                                <option value="Həyət evi / Villa">Həyət evi / Villa</option>
+                                <option value="Torpaq">Torpaq</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Elan başlığı</label>
+                        <input type="text" id="new-title" required placeholder="Məs: Elmlər Akademiyası m. yaxınlığında 3 otaqlı təmirli mənzil" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Rayon / Şəhər</label>
+                            <select id="new-location" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                                <option value="Yasamal">Yasamal</option>
+                                <option value="Nəsimi">Nəsimi</option>
+                                <option value="Nərimanov">Nərimanov</option>
+                                <option value="Xətai / Həzi Aslanov">Xətai / Həzi Aslanov</option>
+                                <option value="Səbail">Səbail</option>
+                                <option value="Xırdalan">Xırdalan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Dəqiq ünvan / Metro</label>
+                            <input type="text" id="new-address" required placeholder="Məs: Yasamal r., İnşaatçılar m." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Qiymət (AZN)</label>
+                            <input type="number" id="new-price" required min="100" placeholder="195000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Otaq sayı</label>
+                            <select id="new-rooms" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                                <option value="1">1 otaqlı</option>
+                                <option value="2">2 otaqlı</option>
+                                <option value="3" selected>3 otaqlı</option>
+                                <option value="4+">4+ otaqlı</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Sahə (m²)</label>
+                            <input type="number" id="new-area" required min="15" placeholder="105" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Mərtəbə (Məs: 9/16)</label>
+                            <input type="text" id="new-floor" required placeholder="9 / 16" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="flex items-center gap-4 pt-5">
+                            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+                                <input type="checkbox" id="new-kupca" checked class="rounded text-amber-600 focus:ring-amber-500">
+                                <span>Çıxarış var</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+                                <input type="checkbox" id="new-ipoteka" checked class="rounded text-amber-600 focus:ring-amber-500">
+                                <span>İpotekaya yararlı</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Əlavə təsvir</label>
+                        <textarea id="new-desc" rows="2" placeholder="Mənzilin təmiri, şəraiti və sənədləri barədə qısa məlumat..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-amber-500"></textarea>
+                    </div>
+
+                    <div class="pt-3 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeAddListingModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Ləğv et</button>
+                        <button type="submit" class="bg-navy-900 hover:bg-amber-600 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-md transition-colors">Elanı dərc et</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Məntiqi -->
+    <script>
+        // Başlanğıc Realistik Bakı və Xırdalan Əmlak Bazası
+        let properties = [
+            {
+                id: 1,
+                deal: "Alqı-satqı",
+                type: "Yeni tikili",
+                title: "Panorama Park yaşayış kompleksində dəniz mənzərəli 3 otaqlı mənzil",
+                location: "Xətai / Həzi Aslanov",
+                address: "Xətai r., Gəncə pr. (Həzi Aslanov m.)",
+                price: 235000,
+                rooms: "3",
+                area: 118,
+                floor: "14 / 19",
+                badges: ["Çıxarış var", "İpotekaya yararlı", "Yeni təmir"],
+                mortgageEligible: true,
+                image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80",
+                agent: "Rəşad Əliyev",
+                description: "Müasir üslubda yüksək keyfiyyətli materiallarla yeni təmir olunmuş geniş və işıqlı mənzil. Mətbəx ayrıdır, iki sanitar qovşağı və Xəzər dənizinə açılan geniş eyvanı mövcuddur. Kompleksin 24/7 mühafizə xidməti və yeraltı dayanacağı var.",
+                features: ["Kupça var", "Mətbəx ayrıdır", "İsti döşəmə", "Yeraltı qaraj", "Dəniz mənzərəsi"]
+            },
+            {
+                id: 2,
+                deal: "Alqı-satqı",
+                type: "Yeni tikili",
+                title: "Elmlər Akademiyası yaxınlığında premium 2 otaqlı mənzil",
+                location: "Yasamal",
+                address: "Yasamal r., H.Cavid pr. (Elmlər Akademiyası m.)",
+                price: 210000,
+                rooms: "2",
+                area: 86,
+                floor: "9 / 16",
+                badges: ["Çıxarış var", "İpotekaya yararlı"],
+                mortgageEligible: true,
+                image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80",
+                agent: "Nigar Məmmədova",
+                description: "Şəhərin ən prestijli ərazilərindən birində, Hüseyn Cavid parkının yanında yerləşən yeni tikili binada əla təmirli mənzil. Qaz, su, işıq daimidir. Dövlət ipotekasına tam yararlıdır.",
+                features: ["Kupça var", "Park mənzərəsi", "2 sürətli lift", "Kombi sistemi"]
+            },
+            {
+                id: 3,
+                deal: "Alqı-satqı",
+                type: "Həyət evi / Villa",
+                title: "Mərdəkan bağlarında müasir memarlıq üslubunda hovuzlu villa",
+                location: "Səbail",
+                address: "Bakı ş., Səbail / Badamdar massivi",
+                price: 540000,
+                rooms: "4+",
+                area: 260,
+                floor: "2 mərtəbə",
+                badges: ["Çıxarış var", "Yeni təmir"],
+                mortgageEligible: false,
+                image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1000&q=80",
+                agent: "Kamran Həsənov",
+                description: "6 sot torpaq sahəsində inşa edilmiş 5 otaqlı modern villa. Həyətdə filtrli daşma hovuz, yay mətbəxi, manqal zonası və dekorativ yaşıllıq mövcuddur. Torpağın və evin çıxarışı var.",
+                features: ["Kupça var", "Filtrli hovuz", "Yay mətbəxi", "Avtomatik darvaza", "Smart Home"]
+            },
+            {
+                id: 4,
+                deal: "Alqı-satqı",
+                type: "Yeni tikili",
+                title: "Kristal Abşeron kompleksində təmirli 2 otaqlı mənzil",
+                location: "Xırdalan",
+                address: "Xırdalan ş., Heydər Əliyev pr.",
+                price: 112000,
+                rooms: "2",
+                area: 64,
+                floor: "7 / 14",
+                badges: ["Çıxarış var", "İpotekaya yararlı"],
+                mortgageEligible: true,
+                image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80",
+                agent: "Aysel Quliyeva",
+                description: "Xırdalan şəhərinin mərkəzində, parkın tam qarşısında yerləşən binada səliqəli təmirli mənzil satılır. Gənc ailələr və ipoteka alıcıları üçün ideal seçimdir. Mətbəx mebeli qiymətə daxildir.",
+                features: ["Kupça var", "İpotekaya yararlı", "Mətbəx mebeli", "Qapalı həyət"]
+            },
+            {
+                id: 5,
+                deal: "Kirayə",
+                type: "Yeni tikili",
+                title: "Gənclik Mall yaxınlığında tam əşyalı 3 otaqlı mənzil",
+                location: "Nərimanov",
+                address: "Nərimanov r., Fətəli xan Xoyski küç.",
+                price: 1200,
+                rooms: "3",
+                area: 125,
+                floor: "11 / 17",
+                badges: ["Yeni təmir", "Tam əşyalı"],
+                mortgageEligible: false,
+                image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80",
+                agent: "Rəşad Əliyev",
+                description: "Uzunmüddətli kirayə verilir. Mənzil bütün məişət texnikası (qabyuyan, paltaryuyan, kondisionerlər) və mebellərlə təchiz olunub. Gənclik metrosuna 3 dəqiqəlik piyada məsafədədir.",
+                features: ["Tam əşyalı", "Mətbəx ayrıdır", "2 sanitar qovşağı", "24/7 mühafizə"]
+            },
+            {
+                id: 6,
+                deal: "Alqı-satqı",
+                type: "Köhnə tikili",
+                title: "28 May metrosunun yanında stalinka layihəli 3 otaqlı mənzil",
+                location: "Nəsimi",
+                address: "Nəsimi r., Azadlıq pr. (28 May m.)",
+                price: 265000,
+                rooms: "3",
+                area: 95,
+                floor: "4 / 5",
+                badges: ["Çıxarış var", "İpotekaya yararlı"],
+                mortgageEligible: true,
+                image: "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1000&q=80",
+                agent: "Nigar Məmmədova",
+                description: "Hündür tavanlı (3.40 m), daş bina, yelçəkən (skvoznoy) planlama. Şəhərin mərkəzində həm yaşayış, həm də investisiya üçün yüksək gəlirli mənzildir.",
+                features: ["Kupça var", "Daş bina", "Yelçəkən planlama", "Mərkəzi lokasiya"]
+            },
+            {
+                id: 7,
+                deal: "Alqı-satqı",
+                type: "Yeni tikili",
+                title: "Xırdalan AAAF Parkda 1 otaqdan 2 otağa düzəlmə mənzil",
+                location: "Xırdalan",
+                address: "Xırdalan ş., AAAF Park Yaşayış Kompleksi",
+                price: 79000,
+                rooms: "1",
+                area: 52,
+                floor: "5 / 11",
+                badges: ["Yeni təmir", "İpotekaya yararlı"],
+                mortgageEligible: true,
+                image: "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=1000&q=80",
+                agent: "Aysel Quliyeva",
+                description: "Müasir dizaynla təmir edilmiş, işıqlı və rahat mənzil. Kompleks daxilində məktəb, bağça, supermarketlər və istirahət parkı fəaliyyət göstərir.",
+                features: ["Yeni təmir", "İsti döşəmə", "Park daxilində", "İpotekaya yararlı"]
+            },
+            {
+                id: 8,
+                deal: "Kirayə",
+                type: "Yeni tikili",
+                title: "Port Baku yaxınlığında panoramalı 2 otaqlı studiya mənzil",
+                location: "Nəsimi",
+                address: "Nəsimi r., Neftçilər pr. yaxınlığı",
+                price: 1500,
+                rooms: "2",
+                area: 90,
+                floor: "16 / 22",
+                badges: ["Yeni təmir", "Premium"],
+                mortgageEligible: false,
+                image: "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1000&q=80",
+                agent: "Kamran Həsənov",
+                description: "Bulvara və şəhərə möhtəşəm panoraması olan dizayner təmirli mənzil. Yüksək sürətli internet, konsyerj xidməti və yeraltı dayanacaq mövcuddur.",
+                features: ["Şəhər panoraması", "Konsyerj", "Tam əşyalı", "Mərkəzi kondisioner"]
+            }
+        ];
+
+        // Vəziyyət (State) dəyişənləri
+        let currentDealFilter = "Hamısı";
+        let currentCategoryQuick = "Hamısı";
+        let showOnlyFavorites = false;
+        let favorites = new Set();
+        let selectedInterestRate = 7;
+
+        // Səhifə yükləndikdə ilkin render
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            renderProperties(properties);
+            calculateMortgage();
+        });
+
+        // Qiyməti formatlama funksiyası
+        function formatAZN(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Elan kartlarını ekrana çıxaran funksiya
+        function renderProperties(list) {
+            const grid = document.getElementById("properties-grid");
+            const emptyState = document.getElementById("empty-state");
+            const counter = document.getElementById("results-counter");
+
+            counter.textContent = `Cəmi ${list.length} elan göstərilir`;
+
+            if (list.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+            grid.innerHTML = list.map(item => {
+                const isFav = favorites.has(item.id);
+                const pricePerSqm = Math.round(item.price / item.area);
+                const priceSuffix = item.deal === "Kirayə" ? " AZN / ay" : " AZN";
+
+                return `
+                <article onclick="openPropertyModal(${item.id})" class="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between">
+                    <div>
+                        <!-- Şəkil hissəsi -->
+                        <div class="relative h-60 overflow-hidden bg-slate-100">
+                            <img src="${item.image}" 
+                                 onerror="this.src='https://placehold.co/800x600/1E293B/FFFFFF?text=EvMarka+Əmlak'"
+                                 alt="${item.title}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            
+                            <!-- Üst nişanlar (Badges) -->
+                            <div class="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5 pr-12">
+                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${item.deal === 'Kirayə' ? 'bg-navy-900 text-white' : 'bg-amber-600 text-white'} shadow-sm">
+                                    ${item.deal}
+                                </span>
+                                ${item.badges.slice(0, 2).map(b => `
+                                    <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/95 backdrop-blur-sm text-navy-900 shadow-sm">
+                                        ${b}
+                                    </span>
+                                `).join('')}
+                            </div>
+
+                            <!-- Seçilmişlər (Ürək) düyməsi -->
+                            <button type="button" onclick="toggleFavorite(event, ${item.id})" 
+                                    class="absolute top-3.5 right-3.5 w-9 h-9 rounded-xl bg-white/90 hover:bg-white flex items-center justify-center shadow-md transition-transform active:scale-90 ${isFav ? 'text-rose-600' : 'text-slate-600 hover:text-rose-600'}"
+                                    title="Seçilmişlərə əlavə et">
+                                <svg class="w-5 h-5 ${isFav ? 'fill-rose-600' : 'fill-none'}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+
+                            <!-- Qiymət etiketi -->
+                            <div class="absolute bottom-3 left-3.5 right-3.5 flex items-end justify-between">
+                                <div class="bg-navy-900/90 backdrop-blur-md text-white px-3.5 py-1.5 rounded-xl border border-white/10">
+                                    <span class="font-display font-extrabold text-lg">${formatAZN(item.price)}${priceSuffix}</span>
+                                    ${item.deal === 'Alqı-satqı' ? `<span class="text-[11px] text-slate-300 ml-2">${formatAZN(pricePerSqm)} ₼/m²</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Məzmun hissəsi -->
+                        <div class="p-5">
+                            <div class="flex items-center gap-1.5 text-xs font-medium text-amber-700 mb-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0"></i>
+                                <span class="truncate">${item.address}</span>
+                            </div>
+                            <h3 class="font-display font-bold text-base text-navy-900 line-clamp-2 group-hover:text-amber-600 transition-colors leading-snug">
+                                ${item.title}
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Alt Texniki Göstəricilər -->
+                    <div class="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-600">
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="door-open" class="w-4 h-4 text-slate-400"></i>
+                            ${item.rooms} otaqlı
+                        </span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="maximize-2" class="w-4 h-4 text-slate-400"></i>
+                            ${item.area} m²
+                        </span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
+                            ${item.floor}
+                        </span>
+                    </div>
+                </article>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Filtrləmə Məntiqi
+        function applyFilters() {
+            const typeVal = document.getElementById("filter-type").value;
+            const locVal = document.getElementById("filter-location").value;
+            const roomsVal = document.getElementById("filter-rooms").value;
+            const maxPriceVal = parseFloat(document.getElementById("filter-max-price").value);
+
+            const filtered = properties.filter(item => {
+                if (showOnlyFavorites && !favorites.has(item.id)) return false;
+                if (currentDealFilter !== "Hamısı" && item.deal !== currentDealFilter) return false;
+                if (typeVal !== "Hamısı" && item.type !== typeVal) return false;
+                if (locVal !== "Hamısı" && item.location !== locVal) return false;
+                if (roomsVal !== "Hamısı" && item.rooms !== roomsVal) return false;
+                if (!isNaN(maxPriceVal) && maxPriceVal > 0 && item.price > maxPriceVal) return false;
+
+                if (currentCategoryQuick === "İpoteka" && !item.mortgageEligible) return false;
+                if (currentCategoryQuick !== "Hamısı" && currentCategoryQuick !== "İpoteka" && item.type !== currentCategoryQuick) return false;
+
+                return true;
+            });
+
+            renderProperties(filtered);
+        }
+
+        // Hero Əməliyyat Tabları (Hamısı / Alqı-satqı / Kirayə)
+        function setDealTab(deal) {
+            currentDealFilter = deal;
+            document.querySelectorAll(".deal-tab").forEach(btn => {
+                btn.classList.remove("bg-white", "text-navy-900", "shadow-sm");
+                btn.classList.add("text-slate-600");
+            });
+            const activeId = deal === "Hamısı" ? "tab-all" : deal === "Alqı-satqı" ? "tab-sale" : "tab-rent";
+            const activeBtn = document.getElementById(activeId);
+            activeBtn.classList.add("bg-white", "text-navy-900", "shadow-sm");
+            activeBtn.classList.remove("text-slate-600");
+            applyFilters();
+        }
+
+        // Sürətli Kateqoriya Düymələri
+        function quickCategory(cat) {
+            currentCategoryQuick = cat;
+            document.querySelectorAll(".cat-pill").forEach(btn => {
+                if (btn.textContent.trim().includes(cat) || (cat === "İpoteka" && btn.textContent.includes("İpoteka"))) {
+                    btn.classList.add("bg-navy-900", "text-white");
+                    btn.classList.remove("bg-white", "text-slate-700", "border", "border-slate-200");
+                } else {
+                    btn.classList.remove("bg-navy-900", "text-white");
+                    btn.classList.add("bg-white", "text-slate-700", "border", "border-slate-200");
+                }
+            });
+            applyFilters();
+        }
+
+        // Naviqasiya və Footer-dən sürətli keçidlər
+        function quickFilterDeal(deal) {
+            resetFilters(false);
+            setDealTab(deal);
+        }
+        function quickFilterType(type) {
+            resetFilters(false);
+            document.getElementById("filter-type").value = type;
+            applyFilters();
+        }
+        function quickLocation(loc) {
+            resetFilters(false);
+            document.getElementById("filter-location").value = loc;
+            applyFilters();
+        }
+
+        // Bütün filtrləri sıfırlama
+        function resetFilters(shouldRender = true) {
+            currentDealFilter = "Hamısı";
+            currentCategoryQuick = "Hamısı";
+            showOnlyFavorites = false;
+            document.getElementById("filter-type").value = "Hamısı";
+            document.getElementById("filter-location").value = "Hamısı";
+            document.getElementById("filter-rooms").value = "Hamısı";
+            document.getElementById("filter-max-price").value = "";
+            
+            document.querySelectorAll(".deal-tab").forEach(btn => {
+                btn.classList.remove("bg-white", "text-navy-900", "shadow-sm");
+                btn.classList.add("text-slate-600");
+            });
+            document.getElementById("tab-all").classList.add("bg-white", "text-navy-900", "shadow-sm");
+            document.getElementById("tab-all").classList.remove("text-slate-600");
+
+            document.querySelectorAll(".cat-pill").forEach((btn, idx) => {
+                if (idx === 0) {
+                    btn.classList.add("bg-navy-900", "text-white");
+                    btn.classList.remove("bg-white", "text-slate-700", "border", "border-slate-200");
+                } else {
+                    btn.classList.remove("bg-navy-900", "text-white");
+                    btn.classList.add("bg-white", "text-slate-700", "border", "border-slate-200");
+                }
+            });
+
+            if (shouldRender) applyFilters();
+        }
+
+        // Seçilmişlər (Favorites) Funksiyası
+        function toggleFavorite(event, id) {
+            event.stopPropagation();
+            if (favorites.has(id)) {
+                favorites.delete(id);
+                showToast("Seçilmişlərdən çıxarıldı", "Elan seçilmişlər siyahısından silindi.");
+            } else {
+                favorites.add(id);
+                showToast("Seçilmişlərə əlavə edildi", "Elan yadda saxlanıldı.");
+            }
+            updateFavBadge();
+            applyFilters();
+        }
+
+        function updateFavBadge() {
+            const badge = document.getElementById("fav-count-badge");
+            badge.textContent = favorites.size;
+            if (favorites.size > 0) {
+                badge.classList.remove("hidden");
+            } else {
+                badge.classList.add("hidden");
+            }
+        }
+
+        function toggleFavoritesFilter() {
+            if (favorites.size === 0 && !showOnlyFavorites) {
+                showToast("Siyahı boşdur", "Hələ heç bir elanı seçilmişlərə əlavə etməmisiniz.");
+                return;
+            }
+            showOnlyFavorites = !showOnlyFavorites;
+            applyFilters();
+            document.getElementById("elanlar").scrollIntoView({ behavior: "smooth" });
+        }
+
+        // Əmlak Detalları Modalı
+        function openPropertyModal(id) {
+            const item = properties.find(p => p.id === id);
+            if (!item) return;
+
+            document.getElementById("modal-img").src = item.image;
+            document.getElementById("modal-deal-type").textContent = `${item.deal} • ${item.type}`;
+            document.getElementById("modal-title").textContent = item.title;
+            document.getElementById("modal-location").querySelector("span").textContent = item.address;
+            
+            const priceSuffix = item.deal === "Kirayə" ? " AZN / ay" : " AZN";
+            document.getElementById("modal-price").textContent = `${formatAZN(item.price)}${priceSuffix}`;
+            document.getElementById("modal-price-sqm").textContent = item.deal === "Alqı-satqı" 
+                ? `${formatAZN(Math.round(item.price / item.area))} AZN / m²` 
+                : "Kommunal xərclər daxil deyil";
+
+            document.getElementById("modal-rooms").textContent = `${item.rooms} otaqlı`;
+            document.getElementById("modal-area").textContent = `${item.area} m²`;
+            document.getElementById("modal-floor").textContent = item.floor;
+            document.getElementById("modal-desc").textContent = item.description;
+            document.getElementById("modal-agent-name").textContent = item.agent;
+
+            document.getElementById("modal-badges").innerHTML = item.badges.map(b => `
+                <span class="px-3 py-1 rounded-lg text-xs font-bold bg-white/95 text-navy-900 shadow-sm">${b}</span>
+            `).join('');
+
+            document.getElementById("modal-features").innerHTML = item.features.map(f => `
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200/70 text-xs font-semibold">
+                    <i data-lucide="check" class="w-3.5 h-3.5 text-amber-600"></i>
+                    ${f}
+                </span>
+            `).join('');
+
+            document.getElementById("property-modal").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+            lucide.createIcons();
+        }
+
+        function closePropertyModal() {
+            document.getElementById("property-modal").classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        function submitViewingRequest(event) {
+            event.preventDefault();
+            event.target.reset();
+            closePropertyModal();
+            showToast("Sorğunuz qəbul edildi", "Əmlak eksperti 15 dəqiqə ərzində sizinlə əlaqə saxlayacaq.");
+        }
+
+        // Yeni Elan Əlavə Etmə Modalı
+        function openAddListingModal() {
+            document.getElementById("add-listing-modal").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeAddListingModal() {
+            document.getElementById("add-listing-modal").classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        function handleAddNewListing(event) {
+            event.preventDefault();
+            const deal = document.getElementById("new-deal").value;
+            const type = document.getElementById("new-type").value;
+            const title = document.getElementById("new-title").value;
+            const location = document.getElementById("new-location").value;
+            const address = document.getElementById("new-address").value;
+            const price = parseFloat(document.getElementById("new-price").value);
+            const rooms = document.getElementById("new-rooms").value;
+            const area = parseFloat(document.getElementById("new-area").value);
+            const floor = document.getElementById("new-floor").value;
+            const hasKupca = document.getElementById("new-kupca").checked;
+            const hasIpoteka = document.getElementById("new-ipoteka").checked;
+            const desc = document.getElementById("new-desc").value || "Yeni əlavə edilmiş səliqəli və işıqlı əmlak. Ətraflı məlumat üçün əlaqə saxlayın.";
+
+            const badges = [];
+            if (hasKupca) badges.push("Çıxarış var");
+            if (hasIpoteka) badges.push("İpotekaya yararlı");
+            badges.push("Yeni elan");
+
+            const sampleImages = [
+                "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1000&q=80",
+                "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1000&q=80"
+            ];
+
+            const newItem = {
+                id: Date.now(),
+                deal,
+                type,
+                title,
+                location,
+                address,
+                price,
+                rooms,
+                area,
+                floor,
+                badges,
+                mortgageEligible: hasIpoteka,
+                image: sampleImages[Math.floor(Math.random() * sampleImages.length)],
+                agent: "Əmlak Sahibi",
+                description: desc,
+                features: badges
+            };
+
+            properties.unshift(newItem);
+            event.target.reset();
+            closeAddListingModal();
+            resetFilters();
+            showToast("Elanınız dərc olundu!", "Yeni əmlak elanı kataloqun ən başındadır.");
+            document.getElementById("elanlar").scrollIntoView({ behavior: "smooth" });
+        }
+
+        // İpoteka Kalkulyatoru Məntiqi
+        function syncMortgageFromRange() {
+            document.getElementById("calc-price-input").value = document.getElementById("calc-price-range").value;
+            calculateMortgage();
+        }
+
+        function syncMortgageFromInput() {
+            const val = parseFloat(document.getElementById("calc-price-input").value) || 30000;
+            document.getElementById("calc-price-range").value = Math.min(Math.max(val, 30000), 1000000);
+            calculateMortgage();
+        }
+
+        function setInterestRate(rate, btnEl) {
+            selectedInterestRate = rate;
+            document.querySelectorAll(".rate-btn").forEach(b => {
+                b.className = "rate-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-700 hover:border-amber-500 transition-all";
+                b.querySelector("span").className = "block text-[10px] font-normal text-slate-400";
+            });
+            btnEl.className = "rate-btn py-2 px-2 rounded-xl text-xs font-bold border-2 border-amber-500 bg-amber-50 text-amber-900 transition-all";
+            btnEl.querySelector("span").className = "block text-[10px] font-normal text-amber-700";
+            calculateMortgage();
+        }
+
+        function calculateMortgage() {
+            const price = parseFloat(document.getElementById("calc-price-input").value) || 180000;
+            const downPercent = parseFloat(document.getElementById("calc-down-range").value);
+            const years = parseFloat(document.getElementById("calc-years-range").value);
+
+            const downAmount = Math.round(price * (downPercent / 100));
+            const loanAmount = price - downAmount;
+            const monthlyRate = (selectedInterestRate / 100) / 12;
+            const totalMonths = years * 12;
+
+            let monthlyPayment = 0;
+            if (monthlyRate > 0) {
+                monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+            } else {
+                monthlyPayment = loanAmount / totalMonths;
+            }
+
+            const totalPayable = monthlyPayment * totalMonths;
+            const totalInterest = Math.max(0, totalPayable - loanAmount);
+            const principalRatio = totalPayable > 0 ? Math.round((loanAmount / totalPayable) * 100) : 100;
+
+            document.getElementById("calc-down-percent-label").textContent = `${downPercent}%`;
+            document.getElementById("calc-down-amount-label").textContent = `${formatAZN(downAmount)} AZN`;
+            document.getElementById("calc-years-label").textContent = `${years} il`;
+            document.getElementById("calc-monthly-payment").textContent = formatAZN(Math.round(monthlyPayment));
+            document.getElementById("calc-loan-amount").textContent = `${formatAZN(loanAmount)} ₼`;
+            document.getElementById("calc-rate-display").textContent = `${selectedInterestRate}%`;
+
+            document.getElementById("bar-principal").style.width = `${principalRatio}%`;
+            document.getElementById("bar-interest").style.width = `${100 - principalRatio}%`;
+        }
+
+        // Mobil Menyu və Toast Bildiriş
+        function toggleMobileMenu() {
+            document.getElementById("mobile-menu").classList.toggle("hidden");
+        }
+
+        let toastTimeout;
+        function showToast(title, message) {
+            const toast = document.getElementById("toast");
+            document.getElementById("toast-title").textContent = title;
+            document.getElementById("toast-message").textContent = message;
+
+            toast.classList.remove("translate-y-24", "opacity-0");
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add("translate-y-24", "opacity-0");
+            }, 3500);
+        }
+
+        // Modal xaricinə kliklədikdə bağlanma
+        window.addEventListener("click", (e) => {
+            const propModal = document.getElementById("property-modal");
+            const addModal = document.getElementById("add-listing-modal");
+            if (e.target === propModal) closePropertyModal();
+            if (e.target === addModal) closeAddListingModal();
+        });
+    </script>
+</body>
+</html>
